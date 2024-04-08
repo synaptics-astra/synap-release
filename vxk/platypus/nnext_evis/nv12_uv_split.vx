@@ -1,0 +1,31 @@
+#include "cl_viv_vx_ext.h"
+
+// split input0 UV component of NV12 to output0 U and ouput1 V
+// uvuvuvuv... --> uuuuuuuu... and vvvvv...
+// both input and output UINT8
+
+_viv_uniform VXC_512Bits uniSplitNV12U_2x8;
+_viv_uniform VXC_512Bits uniSplitNV12V_2x8;
+
+
+__kernel void nv12_uv_split(
+    __read_only image2d_array_t input0,
+    __write_only image2d_array_t output0,
+    __write_only image2d_array_t output1
+    )
+{
+
+    int2 coord = (int2)(get_global_id(0), get_global_id(1));
+    int2 coord_in = (int2)(get_global_id(0) * 2, get_global_id(1));
+
+    vxc_uchar16 src0, dst_u, dst_v;
+
+    VXC_ReadImage(src0, input0, coord_in, VXC_5BITOFFSET_XY(0, 0), VXC_MODIFIER(0, 15, 0, VXC_RM_TowardZero, 0));
+    VXC_DP2x8(dst_u, src0, src0, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0), uniSplitNV12U_2x8);
+    VXC_DP2x8(dst_v, src0, src0, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0), uniSplitNV12V_2x8);
+
+    VXC_WriteImage(output0, coord, dst_u, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0));
+    VXC_WriteImage(output1, coord, dst_v, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0));
+
+}
+

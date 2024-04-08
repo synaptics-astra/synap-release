@@ -1,0 +1,60 @@
+#include "cl_viv_vx_ext.h"
+
+_viv_uniform uint  xrIntFloat_16;
+_viv_uniform uint  yrIntFloat_16;
+
+_viv_uniform VXC_512Bits uniCalculateYShift_2x8;
+_viv_uniform VXC_512Bits uniCalculateUVShift_2x8;
+
+__kernel void nv12_downscale(
+    __read_only image2d_array_t y_img, __read_only image2d_array_t uv_img,
+    __write_only image2d_array_t output0, __write_only image2d_array_t output1,
+    global int *xRatio, global int *yRatio, global int *xOffset, global int *yOffset)
+{
+
+    int4 coord_ref = (int4)(get_global_id(0), get_global_id(1), get_global_id(0), get_global_id(1));
+
+    int2 out_coord = coord_ref.zw;
+    int out_Y_x = coord_ref.z;
+    int out_Y_y = coord_ref.w;
+    int out_UV_x = out_Y_x & 0xfffffffe;
+    int out_UV_y = out_Y_y >> 1;
+
+    int2 out_Y_coord = (int2)(out_Y_x, out_Y_y);
+    int2 out_uv_coord = (int2)(out_UV_x, out_UV_y);
+
+    uint4 gidx = get_global_id(0);
+    uint gidy = get_global_id(1);
+    gidx += (uint4)(0, 1, 2, 3);
+
+    uint dy = (gidy * yrIntFloat_16) >> 16;
+    uint4 dx = (gidx * xrIntFloat_16) >> 16;
+    int sy = convert_int(dy) + (*yOffset);
+    int4 sx = convert_int4(dx) + (*xOffset);
+    int4 uvX = sx & 0xfffffffe;
+    int uvY = sy >> 1;
+
+    vxc_uchar16 Y, UV;
+    int2 coord = (int2)(sx.x, sy);
+    int2 coord_uv = (int2)(uvX.x, uvY);
+    VXC_ReadImage(Y, y_img, coord, VXC_5BITOFFSET_XY(0, 0), VXC_MODIFIER(0, 15, 0, VXC_RM_TowardZero, 0));
+    VXC_ReadImage(UV, uv_img,coord_uv, VXC_5BITOFFSET_XY(0,0),VXC_MODIFIER(0, 15, 0, VXC_RM_TowardZero, 0));
+
+    vxc_uchar16 maskShift = {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+    vxc_uchar16 maskShiftUv = {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
+    int4 offsetUV = uvX - uvX.x;
+
+    vxc_ushort8 diffY, diffUV;
+    _viv_asm(COPY, diffY, sx, 16);
+    _viv_asm(COPY, diffUV, offsetUV, 16);
+
+    vxc_ushort8 constData = 8;
+    VXC_DP2x8(maskShift, diffY, constData, VXC_MODIFIER(0, 3, 0, VXC_RM_TowardZero, 1), uniCalculateYShift_2x8);
+    VXC_DP2x8(maskShiftUv, diffUV, constData, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 1), uniCalculateUVShift_2x8);
+    VXC_BitExtract(Y, Y, Y, maskShift, VXC_MODIFIER(0, 3, 0, VXC_RM_TowardZero, 0));
+    VXC_BitExtract(UV, UV, UV, maskShiftUv, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0));
+
+    VXC_WriteImage(output0, out_Y_coord, Y, VXC_MODIFIER(0, 3, 0, VXC_RM_TowardZero, 0));
+    VXC_WriteImage(output1, out_uv_coord, UV, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0));
+
+}

@@ -1,0 +1,28 @@
+#include "cl_viv_vx_ext.h"
+
+// combine input0 U component with input1 U component to be UV component of nv12
+// uuuu... vvvv... --> uvuvuvuv...
+// both input and output UINT8
+
+_viv_uniform VXC_512Bits uniCombineNV12L_2x8;
+_viv_uniform VXC_512Bits uniCombineNV12H_2x8;
+
+__kernel void nv12_uv_combine(
+    __read_only image2d_t input0,
+    __read_only image2d_t input1,
+    __write_only image2d_t output)
+{
+
+    int4 coord = (int4)(get_global_id(0), get_global_id(1), get_global_id(0) * 2, get_global_id(1) * 2);
+    vxc_uchar16 src0, src1;
+    vxc_uchar16 dst;
+
+    VXC_ReadImage(src0, input0, coord.xy, VXC_5BITOFFSET_XY(0, 0), VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0));
+    VXC_ReadImage(src1, input1, coord.xy, VXC_5BITOFFSET_XY(0, 0), VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0));
+
+    VXC_DP2x8(dst, src0, src1, VXC_MODIFIER(0, 7, 0, VXC_RM_TowardZero, 0), uniCombineNV12L_2x8);
+    VXC_DP2x8(dst, src0, src1, VXC_MODIFIER(8, 15, 0, VXC_RM_TowardZero, 0), uniCombineNV12H_2x8);
+
+    VXC_WriteImage(output, coord.zy, dst, VXC_MODIFIER(0, 15, 0, VXC_RM_TowardZero, 0));
+
+}

@@ -1,0 +1,78 @@
+
+__kernel void gpuTensor_rounding_floor_F32toF32
+    (
+    __read_only  image2d_array_t input,
+    __write_only image2d_array_t output,
+                           float inputScale,
+                           float inputTail,
+                           float outputScale,
+                           float outputZP
+    )
+{
+    int4 coord = (int4)(get_global_id(0), get_global_id(1), get_global_id(2), 0);
+    float4 dst = {0.0};
+
+    float4 src = read_imagef(input, coord);
+    dst.x = floor(src.x);
+    write_imagef(output, coord, dst);
+}
+
+__kernel void gpuTensor_rounding_ceiling_F32toF32
+    (
+    __read_only  image2d_array_t input,
+    __write_only image2d_array_t output,
+                           float inputScale,
+                           float inputTail,
+                           float outputScale,
+                           float outputZP
+    )
+{
+    int4 coord = (int4)(get_global_id(0), get_global_id(1), get_global_id(2), 0);
+    float4 dst = {0.0};
+
+    float4 src = read_imagef(input, coord);
+    dst.x = ceil(src.x);
+    write_imagef(output, coord, dst);
+}
+
+__kernel void gpuTensor_rounding_floor_U8toU8
+    (
+    __read_only  image2d_array_t input,
+    __write_only image2d_array_t output,
+                           float inputScale,
+                           float inputTail,
+                           float outputScale,
+                           float outputZP
+    )
+{
+    int4 coord = (int4)(get_global_id(0), get_global_id(1), get_global_id(2), 0);
+    float4 tmp;
+    uint4 dst = {0};
+
+    float4 src = convert_float4(read_imageui(input, coord));
+    tmp.x = floor(src.x * inputScale + inputTail);
+    dst = floor(tmp.x * outputScale + outputZP);
+    write_imageui(output, coord, dst);
+}
+
+__kernel void gpuTensor_rounding_ceiling_U8toU8
+    (
+    __read_only  image2d_array_t input,
+    __write_only image2d_array_t output,
+                           float inputScale,
+                           float inputTail,
+                           float outputScale,
+                           float outputZP
+    )
+{
+    int4 coord = (int4)(get_global_id(0), get_global_id(1), get_global_id(2), 0);
+    float4 tmp;
+    uint4 dst = {0};
+
+    float4 src = convert_float4(read_imageui(input, coord));
+    tmp.x = ceil(src.x * inputScale + inputTail);
+    dst = floor(tmp.x * outputScale + outputZP);
+    write_imageui(output, coord, dst);
+}
+
+
