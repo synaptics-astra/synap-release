@@ -1,0 +1,18 @@
+{
+  "type" : 1,
+  "PrimaryChromaticityR_X" : 0.708,
+  "PrimaryChromaticityR_Y" : 0.292,
+  "PrimaryChromaticityG_X" : 0.170,
+  "PrimaryChromaticityG_Y" : 0.797,
+  "PrimaryChromaticityB_X" : 0.131,
+  "PrimaryChromaticityB_Y" : 0.046,
+  "WhitePointChromaticity_X" : 0.3127,
+  "WhitePointChromaticity_Y" : 0.3290,
+  "LuminanceMax" : 700,
+  "LuminanceMin" : 0,
+  "MatrixCoefficients" : 0,
+  "TransferCharacteristics" : 16,
+  "ColorPrimaries" : 9,
+  "MaxCLL" : 4008,
+  "MaxFALL" : 64
+}
