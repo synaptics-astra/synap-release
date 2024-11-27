@@ -208,6 +208,11 @@
 #include "ops/vsi_nn_op_grid_sample.h"
 #include "ops/vsi_nn_op_lpnorm.h"
 #include "ops/vsi_nn_op_resize_3d.h"
+#include "ops/vsi_nn_op_reducel2.h"
+#include "ops/vsi_nn_op_crop_and_resize.h"
+#include "ops/vsi_nn_op_rmsnorm.h"
+#include "ops/vsi_nn_op_shape.h"
+#include "ops/vsi_nn_op_bitcast.h"
 /* custom node head define define */
 #include "custom/vsi_nn_custom_node_type.h"
 #include "ops/vsi_nn_op_inverse_sigmoid.h"
@@ -404,6 +409,11 @@ typedef union _vsi_nn_nn_param
     vsi_nn_grid_sample_param        gridsample;
     vsi_nn_lpnorm_param             lpnorm;
     vsi_nn_resize_3d_param          resize_3d;
+    vsi_nn_reducel2_param           reducel2;
+    vsi_nn_crop_and_resize_param    crop_and_resize;
+    vsi_nn_rmsnorm_param            rmsnorm;
+    vsi_nn_shape_param              shape;
+    vsi_nn_bitcast_param            bitcast;
     void*                         client_param;
 
     /* custom node data struct define */

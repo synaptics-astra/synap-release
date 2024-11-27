@@ -241,7 +241,7 @@ OVXLIB_API vsi_status vsi_nn_VerifyGraph
  */
 OVXLIB_API vsi_status vsi_nn_RunGraph
     (
-    const vsi_nn_graph_t * graph
+    vsi_nn_graph_t * graph
     );
 
 /**
@@ -273,7 +273,7 @@ OVXLIB_API vsi_status vsi_nn_AsyncRunGraph
 
 OVXLIB_API vsi_status vsi_nn_AsyncRunWait
     (
-        vsi_nn_graph_t * graph
+    vsi_nn_graph_t * graph
     );
 
 /**
@@ -380,6 +380,31 @@ OVXLIB_API vsi_nn_tensor_id_t vsi_nn_AddTensorFromView
     vsi_nn_tensor_id_t id,
     vsi_size_t* start,
     vsi_size_t* end
+    );
+
+/**
+ * Add a new tensor from AXI-SRAM
+ * Create a new tensor from internal AXI-SRAM and add it to graph.
+ * It just creates the tensor object and does not actually allocate the memory
+ * in AXI-SRAM until the verify graph stage. In the other words, the tensor object is
+ * created beforehand,but the memory for storing its data is not allocate until verify
+ * graph stage. AXI-SRAM is the internal memory resource that memory allocation is done
+ * strategically to optimize performance and resource usage in graph verification.
+ * If there is no enough memory in AXI-SRAM, vsi_nn_VerifyGraph will return VSI_FAILURE
+ * User can't access the tensor memory(read/write tensor data) before the graph has verified,
+ * since the tensor memory is not allocated.
+ * @param[in] graph Graph handle
+ * @param[in] id Optional id to the tensor, set it to VSI_NN_TENSOR_ID_AUTO,
+ *           and a new id will be generated.
+ * @param[in] attr Tensor attirbutes to the new tensor.
+ *
+ * @return The new tensor id on success, or VSI_NN_TENSOR_ID_NA otheriwse.
+ */
+OVXLIB_API vsi_nn_tensor_id_t vsi_nn_AddTensorFromAXISRAM
+    (
+    vsi_nn_graph_t       * graph,
+    vsi_nn_tensor_id_t     id,
+    vsi_nn_tensor_attr_t * attr
     );
 
 /**
@@ -556,7 +581,7 @@ OVXLIB_API vsi_bool vsi_nn_SetGraphOutputs
  * @param[in] graph Graph handle
  * @param[in] id Node id to be removed.
  */
-void vsi_nn_RemoveNode
+OVXLIB_API void vsi_nn_RemoveNode
     (
     vsi_nn_graph_t      * graph,
     vsi_nn_node_id_t      id
@@ -788,6 +813,26 @@ OVXLIB_API vsi_status vsi_nn_ExecuteGraphLoop
     vsi_nn_graph_t* graph,
     vsi_nn_tensor_t *max_iteration_tensor
     );
+
+OVXLIB_API vsi_status vsi_nn_SetGraphTransformOption
+    (
+    vsi_nn_graph_t* graph,
+    const char* ctrl_str,
+    size_t size
+    );
+
+/**
+ * graph shape inference
+ *
+ * @param[in] graph Graph handle
+ *
+ * @return VSI_SUCCESS on success, or appropriate error code otherwise
+ * */
+OVXLIB_API vsi_status vsi_nn_InferShape
+(
+    vsi_nn_graph_t* graph
+);
+
 #ifdef __cplusplus
 }
 #endif

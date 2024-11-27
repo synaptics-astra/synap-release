@@ -89,6 +89,8 @@ typedef enum
     VSI_NN_SOURCE_FORMAT_IMAGE_YUYV422,
     VSI_NN_SOURCE_FORMAT_IMAGE_UYVY422,
     VSI_NN_SOURCE_FORMAT_IMAGE_NV21,
+    VSI_NN_SOURCE_FORMAT_IMAGE_NV12_RGGB,
+    VSI_NN_SOURCE_FORMAT_IMAGE_NV21_BGGR,
 } vsi_nn_preprocess_source_format_e;
 
 /**
@@ -261,6 +263,14 @@ OVXLIB_API vsi_status vsi_nn_AddBinaryGraphInputsWithCropParam
     (
         vsi_nn_graph_t* graph,
         vsi_nn_node_id_t* enable_nodes,
+        uint32_t enable_nodes_count
+    );
+
+OVXLIB_API vsi_status vsi_nn_AddBinaryGraphInputsWithCropParamForCropOnly
+    (
+        vsi_nn_graph_t* graph,
+        vsi_nn_node_id_t* enable_nodes,
+        vsi_bool* crop_set_start_only,
         uint32_t enable_nodes_count
     );
 
