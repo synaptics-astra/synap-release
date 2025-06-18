@@ -1,0 +1,39 @@
+{
+  "nb" : "../model.nb",
+  "meta": "../model.json",
+  "flip": false,
+  "blur":
+        {
+            "check": true,
+            "method": "model",
+            "nb": "../../../../../image_classification/blur/model/blur_quant/model.synap"
+        },
+  "pose_check": true,
+  "gen_db": false,
+  "db_info" : [
+      {
+          "flipped": false,
+          "threshold": 0.020,
+          "db": [
+              {
+                  "db_path" : "db/extra_8bit.db",
+                  "id_path" : "db/extra_name_8bit.txt"
+              },
+              {
+                  "db_path" : "db/lfw_all_8bit.db",
+                  "id_path" : "db/lfw_all_name_8bit.txt"
+              }
+          ]
+      },
+      {
+          "flipped": true,
+          "threshold": 0.022,
+          "db": [
+              {
+                  "db_path" : "db/lfw_all_16bit.db",
+                  "id_path" : "db/lfw_all_name.txt"
+              }
+          ]
+      }
+  ]
+}
